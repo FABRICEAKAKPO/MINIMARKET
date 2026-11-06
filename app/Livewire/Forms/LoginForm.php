@@ -31,6 +31,12 @@ class LoginForm extends Form
     {
         $user = User::query()->where('email', $this->email)->first();
 
+        if ($user !== null && ! $user->is_active) {
+            throw ValidationException::withMessages([
+                'form.email' => 'Ce compte a été désactivé. Contactez l’administrateur.',
+            ]);
+        }
+
         if ($user?->locked_until?->isFuture()) {
             throw ValidationException::withMessages([
                 'form.email' => 'Ce compte est temporairement verrouillé. Réessayez plus tard.',

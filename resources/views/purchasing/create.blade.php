@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot name="header"><h2 class="text-xl font-semibold text-gray-800">Nouvelle commande d'achat</h2></x-slot>
+    <x-slot name="header"><div class="flex items-center justify-between"><h2 class="text-xl font-semibold text-gray-800">Nouvelle commande d'achat</h2><a href="{{ route('purchasing.index') }}" class="text-sm font-bold text-emerald-700 hover:text-emerald-900">← Retour aux achats</a></div></x-slot>
     <div class="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8"><form method="POST" action="{{ route('purchasing.store') }}" class="space-y-5 rounded-lg bg-white p-6 shadow">@csrf
         <div><x-input-label for="supplier_id" value="Fournisseur" /><select id="supplier_id" name="supplier_id" class="mt-1 block w-full rounded-md border-gray-300" required>@foreach ($suppliers as $supplier)<option value="{{ $supplier->id }}">{{ $supplier->name }}</option>@endforeach</select></div>
         <div><x-input-label for="product_id" value="Produit" /><select id="product_id" name="product_id" class="mt-1 block w-full rounded-md border-gray-300" required>@foreach ($products as $product)<option value="{{ $product->id }}">{{ $product->name }} ({{ $product->sku }})</option>@endforeach</select></div>

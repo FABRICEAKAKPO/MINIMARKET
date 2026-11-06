@@ -7,6 +7,7 @@ use App\Http\Controllers\PurchasingController;
 use App\Http\Controllers\CashController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
@@ -29,6 +30,7 @@ Route::middleware(['auth', 'permission:catalog.view'])->group(function (): void 
 Route::middleware(['auth', 'permission:catalog.manage'])->group(function (): void {
     Route::get('catalogue/create', [CatalogController::class, 'create'])->name('catalog.create');
     Route::post('catalogue', [CatalogController::class, 'store'])->name('catalog.store');
+    Route::delete('catalogue/{product}', [CatalogController::class, 'destroy'])->name('catalog.destroy');
 });
 
 Route::middleware(['auth', 'permission:inventory.view'])->group(function (): void {
@@ -91,6 +93,12 @@ Route::middleware(['auth', 'permission:reports.view'])->group(function (): void 
     Route::get('clients', [CustomerController::class, 'index'])->name('customers.index');
     Route::get('clients/{customer}/statement', [CustomerController::class, 'statement'])->name('customers.statement');
     Route::get('depenses', [ExpenseController::class, 'index'])->name('expenses.index');
+});
+
+Route::middleware(['auth', 'permission:users.manage'])->group(function (): void {
+    Route::get('utilisateurs', [UserController::class, 'index'])->name('users.index');
+    Route::post('utilisateurs', [UserController::class, 'store'])->name('users.store');
+    Route::delete('utilisateurs/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 });
 
 Route::middleware(['auth', 'permission:users.manage'])->group(function (): void {

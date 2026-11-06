@@ -17,6 +17,9 @@
         @if (session('status'))
             <div class="rounded-md bg-green-50 p-4 text-sm text-green-800">{{ session('status') }}</div>
         @endif
+        @if ($errors->any())
+            <div class="rounded-md bg-red-50 p-4 text-sm text-red-800">{{ $errors->first() }}</div>
+        @endif
 
         <form method="GET" class="flex gap-3">
             <input name="search" value="{{ request('search') }}" placeholder="Rechercher un nom ou un SKU"
@@ -34,6 +37,7 @@
                             <th class="px-6 py-3">Prix vente</th>
                             <th class="px-6 py-3">Stock</th>
                             <th class="px-6 py-3">Statut</th>
+                            @can('catalog.manage')<th class="px-6 py-3">Action</th>@endcan
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
@@ -50,10 +54,19 @@
                                         {{ $product->stock_quantity }} {{ $product->unit->short_name }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4">{{ $product->is_active ? 'Actif' : 'Inactif' }}</td>
+                                <td class="px-6 py-4"><span class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-800">Actif</span></td>
+                                @can('catalog.manage')
+                                    <td class="px-6 py-4">
+                                        <form method="POST" action="{{ route('catalog.destroy', $product) }}" onsubmit="return confirm('Retirer ce produit du catalogue actif ? Son historique sera conservé.');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="text-sm font-bold text-red-700 hover:text-red-900">Retirer</button>
+                                        </form>
+                                    </td>
+                                @endcan
                             </tr>
                         @empty
-                            <tr><td colspan="5" class="px-6 py-10 text-center text-gray-500">Aucun produit trouvé.</td></tr>
+                            <tr><td colspan="6" class="px-6 py-10 text-center text-gray-500">Aucun produit trouvé.</td></tr>
                         @endforelse
                     </tbody>
                 </table>

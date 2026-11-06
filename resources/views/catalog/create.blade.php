@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold text-gray-800">Nouveau produit</h2>
+        <div class="flex items-center justify-between"><h2 class="text-xl font-semibold text-gray-800">Nouveau produit</h2><a href="{{ route('catalog.index') }}" class="text-sm font-bold text-emerald-700 hover:text-emerald-900">← Retour au catalogue</a></div>
     </x-slot>
 
     <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">

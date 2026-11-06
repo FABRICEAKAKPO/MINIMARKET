@@ -73,6 +73,20 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_deactivated_users_can_not_authenticate(): void
+    {
+        $user = User::factory()->create(['is_active' => false]);
+
+        $component = Volt::test('pages.auth.login')
+            ->set('form.email', $user->email)
+            ->set('form.password', 'password');
+
+        $component->call('login');
+
+        $component->assertHasErrors(['form.email'])->assertNoRedirect();
+        $this->assertGuest();
+    }
+
     public function test_users_are_locked_after_too_many_failed_attempts(): void
     {
         $user = User::factory()->create();

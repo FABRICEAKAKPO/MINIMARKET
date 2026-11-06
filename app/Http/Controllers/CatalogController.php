@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Unit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class CatalogController extends Controller
@@ -23,6 +24,7 @@ class CatalogController extends Controller
                         ->orWhere('sku', 'like', "%{$search}%");
                 });
             })
+            ->where('is_active', true)
             ->orderBy('name')
             ->paginate(20)
             ->withQueryString();
@@ -67,5 +69,26 @@ class CatalogController extends Controller
         }
 
         return redirect()->route('catalog.index')->with('status', 'Produit créé avec succès.');
+    }
+
+    public function destroy(Request $request, Product $product): RedirectResponse
+    {
+        $stockQuantity = $product->stockLots()->sum('quantity');
+
+        if ($stockQuantity > 0) {
+            throw ValidationException::withMessages([
+                'product' => 'Ce produit ne peut pas être retiré tant qu’il reste du stock. Enregistrez d’abord une sortie ou un inventaire.',
+            ]);
+        }
+
+        $product->update(['is_active' => false]);
+
+        activity('catalog')
+            ->causedBy($request->user())
+            ->performedOn($product)
+            ->withProperties(['product_id' => $product->id, 'sku' => $product->sku])
+            ->log('Produit retiré du catalogue actif');
+
+        return redirect()->route('catalog.index')->with('status', 'Produit retiré du catalogue actif. Son historique est conservé.');
     }
 }
