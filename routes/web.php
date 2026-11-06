@@ -6,6 +6,7 @@ use App\Http\Controllers\StockController;
 use App\Http\Controllers\PurchasingController;
 use App\Http\Controllers\CashController;
 use App\Http\Controllers\PosController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
@@ -52,6 +53,15 @@ Route::middleware(['auth', 'permission:purchasing.manage'])->group(function (): 
     Route::post('achats', [PurchasingController::class, 'orderStore'])->name('purchasing.store');
     Route::get('achats/{purchaseOrder}/receive', [PurchasingController::class, 'receiveForm'])->name('purchasing.receive');
     Route::post('achats/{purchaseOrder}/receive', [PurchasingController::class, 'receive'])->name('purchasing.receive.store');
+    Route::get('achats/{purchaseOrder}/document', [PurchasingController::class, 'orderDocument'])->name('purchasing.order.document');
+    Route::get('achats/{purchaseOrder}/document.csv', [PurchasingController::class, 'orderCsv'])->name('purchasing.order.csv');
+    Route::get('fournisseurs/{supplier}/document', [PurchasingController::class, 'supplierDocument'])->name('purchasing.supplier.document');
+    Route::get('fournisseurs/{supplier}/document.csv', [PurchasingController::class, 'supplierCsv'])->name('purchasing.supplier.csv');
+});
+
+Route::middleware(['auth', 'permission:inventory.view'])->group(function (): void {
+    Route::get('rapports/stock', [ReportController::class, 'stock'])->name('reports.stock');
+    Route::get('rapports/stock.csv', [ReportController::class, 'stockCsv'])->name('reports.stock.csv');
 });
 
 Route::middleware(['auth', 'permission:cash.open'])->group(function (): void {
@@ -74,6 +84,10 @@ Route::middleware(['auth', 'permission:sales.cancel'])->group(function (): void 
 });
 
 Route::middleware(['auth', 'permission:reports.view'])->group(function (): void {
+    Route::get('rapports/ventes', [ReportController::class, 'sales'])->name('reports.sales');
+    Route::get('rapports/ventes.csv', [ReportController::class, 'salesCsv'])->name('reports.sales.csv');
+    Route::get('rapports/credit', [ReportController::class, 'credit'])->name('reports.credit');
+    Route::get('rapports/credit.csv', [ReportController::class, 'creditCsv'])->name('reports.credit.csv');
     Route::get('clients', [CustomerController::class, 'index'])->name('customers.index');
     Route::get('clients/{customer}/statement', [CustomerController::class, 'statement'])->name('customers.statement');
     Route::get('depenses', [ExpenseController::class, 'index'])->name('expenses.index');

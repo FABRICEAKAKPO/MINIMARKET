@@ -57,6 +57,7 @@ new class extends Component
                         </x-nav-link>
                     @endcan
                     @can('reports.view')
+                                <x-nav-link :href="route('reports.sales')" :active="request()->routeIs('reports.*')" wire:navigate>{{ __('Rapports') }}</x-nav-link>
                         <x-nav-link :href="route('customers.index')" :active="request()->routeIs('customers.*')" wire:navigate>{{ __('Clients') }}</x-nav-link>
                         <x-nav-link :href="route('expenses.index')" :active="request()->routeIs('expenses.*')" wire:navigate>{{ __('Dépenses') }}</x-nav-link>
                     @endcan
@@ -132,6 +133,7 @@ new class extends Component
                 </x-responsive-nav-link>
             @endcan
             @can('reports.view')
+                <x-responsive-nav-link :href="route('reports.sales')" :active="request()->routeIs('reports.*')" wire:navigate>{{ __('Rapports') }}</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('customers.index')" :active="request()->routeIs('customers.*')" wire:navigate>{{ __('Clients') }}</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('expenses.index')" :active="request()->routeIs('expenses.*')" wire:navigate>{{ __('Dépenses') }}</x-responsive-nav-link>
             @endcan

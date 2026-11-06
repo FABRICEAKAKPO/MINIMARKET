@@ -6,6 +6,8 @@
                 <p class="text-sm text-gray-500">Les sorties utilisent automatiquement les lots les plus proches de la péremption.</p>
             </div>
             <div class="flex gap-2">
+                <a href="{{ route('reports.stock') }}" class="rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700">Fiche stock</a>
+                <button onclick="window.print()" class="rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 print:hidden">Imprimer</button>
                 @can('inventory.manage')
                     <a href="{{ route('stock.receive') }}" class="rounded-md bg-green-700 px-4 py-2 text-sm font-semibold text-white">Réception</a>
                     <a href="{{ route('inventory.create') }}" class="rounded-md bg-gray-800 px-4 py-2 text-sm font-semibold text-white">Inventaire</a>

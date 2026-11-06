@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot name="header"><h2 class="text-xl font-semibold text-gray-800">Inventaire physique</h2></x-slot>
+    <x-slot name="header"><div class="flex items-center justify-between"><h2 class="text-xl font-semibold text-gray-800">Inventaire physique</h2><button onclick="window.print()" class="rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 print:hidden">Imprimer la feuille</button></div></x-slot>
     <div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         <form method="POST" action="{{ route('inventory.store') }}" class="space-y-6 rounded-lg bg-white p-6 shadow">
             @csrf

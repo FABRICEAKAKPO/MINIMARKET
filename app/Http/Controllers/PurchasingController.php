@@ -9,6 +9,7 @@ use App\Models\Supplier;
 use App\Services\StockService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -33,6 +34,7 @@ class PurchasingController extends Controller
             'tax_number' => ['nullable', 'string', 'max:80'],
         ]);
         Supplier::create($data);
+
         return back()->with('status', 'Fournisseur enregistré.');
     }
 
@@ -72,6 +74,7 @@ class PurchasingController extends Controller
                 'unit_cost_xof' => $data['unit_cost_xof'],
                 'line_total_xof' => $data['ordered_quantity'] * $data['unit_cost_xof'],
             ]);
+
             return $order;
         });
 
@@ -81,6 +84,7 @@ class PurchasingController extends Controller
     public function receiveForm(PurchaseOrder $purchaseOrder): View
     {
         $purchaseOrder->load('supplier', 'lines.product');
+
         return view('purchasing.receive', compact('purchaseOrder'));
     }
 
@@ -130,5 +134,54 @@ class PurchasingController extends Controller
         });
 
         return redirect()->route('purchasing.index')->with('status', 'Réception partielle enregistrée et stock augmenté.');
+    }
+
+    public function orderDocument(PurchaseOrder $purchaseOrder): View
+    {
+        $purchaseOrder->load(['supplier', 'user', 'lines.product', 'receipts']);
+
+        return view('purchasing.order-document', compact('purchaseOrder'));
+    }
+
+    public function orderCsv(PurchaseOrder $purchaseOrder): Response
+    {
+        $purchaseOrder->load(['supplier', 'user', 'lines.product']);
+
+        return response()->streamDownload(function () use ($purchaseOrder): void {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+            fputcsv($handle, ['Bon de commande '.$purchaseOrder->number, 'Fournisseur', $purchaseOrder->supplier->name], ';');
+            fputcsv($handle, ['Généré le', now()->format('d/m/Y H:i'), 'Par', auth()->user()->name], ';');
+            fputcsv($handle, ['Produit', 'Quantité commandée', 'Quantité reçue', 'Coût unitaire FCFA', 'Total FCFA'], ';');
+            foreach ($purchaseOrder->lines as $line) {
+                fputcsv($handle, [$line->product->name, $line->ordered_quantity, $line->received_quantity, $line->unit_cost_xof, $line->line_total_xof], ';');
+            }
+            fclose($handle);
+        }, 'commande-'.$purchaseOrder->number.'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    public function supplierDocument(Supplier $supplier): View
+    {
+        $supplier->load(['purchaseOrders' => fn ($query) => $query->with('lines.product')->latest()]);
+
+        return view('purchasing.supplier-document', compact('supplier'));
+    }
+
+    public function supplierCsv(Supplier $supplier): Response
+    {
+        $supplier->load(['purchaseOrders' => fn ($query) => $query->with('lines.product')->latest()]);
+
+        return response()->streamDownload(function () use ($supplier): void {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+            fputcsv($handle, ['Produits commandés auprès de '.$supplier->name], ';');
+            fputcsv($handle, ['Commande', 'Date', 'Produit', 'Quantité', 'Coût unitaire FCFA', 'Total FCFA'], ';');
+            foreach ($supplier->purchaseOrders as $order) {
+                foreach ($order->lines as $line) {
+                    fputcsv($handle, [$order->number, $order->ordered_at->format('d/m/Y'), $line->product->name, $line->ordered_quantity, $line->unit_cost_xof, $line->line_total_xof], ';');
+                }
+            }
+            fclose($handle);
+        }, 'fournisseur-'.str($supplier->name)->slug().'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 }
