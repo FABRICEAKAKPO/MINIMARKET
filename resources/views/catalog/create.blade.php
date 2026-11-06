@@ -14,7 +14,7 @@
             <div class="grid gap-6 sm:grid-cols-2">
                 <div class="sm:col-span-2"><x-input-label for="name" value="Nom du produit" /><x-text-input id="name" name="name" class="mt-1 block w-full" required /></div>
                 <div><x-input-label for="sku" value="Référence SKU" /><x-text-input id="sku" name="sku" class="mt-1 block w-full" required /></div>
-                <div><x-input-label for="barcode" value="Code-barres principal" /><x-text-input id="barcode" name="barcode" class="mt-1 block w-full" /></div>
+                <div><x-input-label for="barcode" value="Code-barres principal" /><x-text-input id="barcode" name="barcode" inputmode="numeric" autocomplete="off" autofocus class="mt-1 block w-full" /><p class="mt-1 text-xs text-gray-500">Un lecteur USB peut saisir le code automatiquement dans ce champ.</p></div>
                 <div><x-input-label for="category_id" value="Catégorie" /><select id="category_id" name="category_id" class="mt-1 block w-full rounded-md border-gray-300" required>@foreach ($categories as $category)<option value="{{ $category->id }}">{{ $category->name }}</option>@endforeach</select></div>
                 <div><x-input-label for="brand_id" value="Marque" /><select id="brand_id" name="brand_id" class="mt-1 block w-full rounded-md border-gray-300"><option value="">Sans marque</option>@foreach ($brands as $brand)<option value="{{ $brand->id }}">{{ $brand->name }}</option>@endforeach</select></div>
                 <div><x-input-label for="unit_id" value="Unité" /><select id="unit_id" name="unit_id" class="mt-1 block w-full rounded-md border-gray-300" required>@foreach ($units as $unit)<option value="{{ $unit->id }}">{{ $unit->name }} ({{ $unit->short_name }})</option>@endforeach</select></div>

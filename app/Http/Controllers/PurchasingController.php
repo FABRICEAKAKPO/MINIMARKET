@@ -42,7 +42,7 @@ class PurchasingController extends Controller
     {
         return view('purchasing.create', [
             'suppliers' => Supplier::where('is_active', true)->orderBy('name')->get(),
-            'products' => Product::where('is_active', true)->orderBy('name')->get(),
+            'products' => Product::with('barcodes')->where('is_active', true)->orderBy('name')->get(),
         ]);
     }
 

@@ -21,7 +21,8 @@ class CatalogController extends Controller
                 $query->where(function ($productQuery) use ($search): void {
                     $productQuery
                         ->where('name', 'like', "%{$search}%")
-                        ->orWhere('sku', 'like', "%{$search}%");
+                        ->orWhere('sku', 'like', "%{$search}%")
+                        ->orWhereHas('barcodes', fn ($barcodeQuery) => $barcodeQuery->where('barcode', 'like', "%{$search}%"));
                 });
             })
             ->where('is_active', true)

@@ -4,7 +4,12 @@
         <form method="POST" action="{{ route('stock.receive.store') }}" class="space-y-5 rounded-lg bg-white p-6 shadow">
             @csrf
             @if ($errors->any())<div class="rounded-md bg-red-50 p-4 text-sm text-red-700"><ul class="list-disc pl-5">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
-            <div><x-input-label for="product_id" value="Produit" /><select id="product_id" name="product_id" class="mt-1 block w-full rounded-md border-gray-300" required>@foreach ($products as $product)<option value="{{ $product->id }}">{{ $product->name }} ({{ $product->sku }})</option>@endforeach</select></div>
+            <div>
+                <x-input-label for="stock-barcode-scanner" value="Scanner le produit (facultatif)" />
+                <x-text-input id="stock-barcode-scanner" type="text" inputmode="numeric" autocomplete="off" class="mt-1 block w-full" placeholder="Code-barres puis Entrée" />
+                <p id="stock-barcode-message" class="mt-1 text-xs text-gray-500" aria-live="polite">Le lecteur USB fonctionne comme un clavier.</p>
+            </div>
+            <div><x-input-label for="product_id" value="Produit" /><select id="product_id" name="product_id" class="mt-1 block w-full rounded-md border-gray-300" required>@foreach ($products as $product)<option value="{{ $product->id }}" data-barcodes="{{ $product->barcodes->pluck('barcode')->implode('|') }}">{{ $product->name }} ({{ $product->sku }})</option>@endforeach</select></div>
             <div class="grid gap-5 sm:grid-cols-2">
                 <div><x-input-label for="lot_number" value="Numéro de lot" /><x-text-input id="lot_number" name="lot_number" class="mt-1 block w-full" required /></div>
                 <div><x-input-label for="quantity" value="Quantité" /><x-text-input id="quantity" name="quantity" type="number" min="1" class="mt-1 block w-full" required /></div>
@@ -15,4 +20,31 @@
             <div class="flex justify-end gap-3"><a href="{{ route('stock.index') }}" class="rounded-md px-4 py-2 text-sm text-gray-600">Annuler</a><button class="rounded-md bg-green-700 px-4 py-2 text-sm font-semibold text-white">Enregistrer la réception</button></div>
         </form>
     </div>
+    <script>
+        (() => {
+            const scanner = document.getElementById('stock-barcode-scanner');
+            const select = document.getElementById('product_id');
+            const message = document.getElementById('stock-barcode-message');
+            const barcodeMap = new Map();
+
+            [...select.options].forEach((option) => {
+                option.dataset.barcodes.split('|').filter(Boolean).forEach((barcode) => barcodeMap.set(barcode.trim(), option.value));
+            });
+            scanner.addEventListener('keydown', (event) => {
+                if (event.key !== 'Enter') return;
+                event.preventDefault();
+                const productId = barcodeMap.get(scanner.value.trim());
+                if (!productId) {
+                    message.textContent = 'Code-barres introuvable dans le catalogue.';
+                    message.className = 'mt-1 text-xs text-red-700';
+                    return;
+                }
+                select.value = productId;
+                message.textContent = 'Produit sélectionné. Complétez la réception.';
+                message.className = 'mt-1 text-xs text-emerald-700';
+                scanner.value = '';
+            });
+            scanner.focus();
+        })();
+    </script>
 </x-app-layout>

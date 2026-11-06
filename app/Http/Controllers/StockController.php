@@ -33,7 +33,7 @@ class StockController extends Controller
     public function receiveForm(): View
     {
         return view('stock.receive', [
-            'products' => Product::query()->where('is_active', true)->orderBy('name')->get(),
+            'products' => Product::query()->with('barcodes')->where('is_active', true)->orderBy('name')->get(),
         ]);
     }
 

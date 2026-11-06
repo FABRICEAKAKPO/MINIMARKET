@@ -2,8 +2,41 @@
     <x-slot name="header"><div class="flex items-center justify-between"><h2 class="text-xl font-semibold text-gray-800">Nouvelle commande d'achat</h2><a href="{{ route('purchasing.index') }}" class="text-sm font-bold text-emerald-700 hover:text-emerald-900">← Retour aux achats</a></div></x-slot>
     <div class="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8"><form method="POST" action="{{ route('purchasing.store') }}" class="space-y-5 rounded-lg bg-white p-6 shadow">@csrf
         <div><x-input-label for="supplier_id" value="Fournisseur" /><select id="supplier_id" name="supplier_id" class="mt-1 block w-full rounded-md border-gray-300" required>@foreach ($suppliers as $supplier)<option value="{{ $supplier->id }}">{{ $supplier->name }}</option>@endforeach</select></div>
-        <div><x-input-label for="product_id" value="Produit" /><select id="product_id" name="product_id" class="mt-1 block w-full rounded-md border-gray-300" required>@foreach ($products as $product)<option value="{{ $product->id }}">{{ $product->name }} ({{ $product->sku }})</option>@endforeach</select></div>
+        <div>
+            <x-input-label for="purchase-barcode-scanner" value="Scanner le produit (facultatif)" />
+            <x-text-input id="purchase-barcode-scanner" type="text" inputmode="numeric" autocomplete="off" class="mt-1 block w-full" placeholder="Code-barres puis Entrée" />
+            <p id="purchase-barcode-message" class="mt-1 text-xs text-gray-500" aria-live="polite">Le lecteur USB fonctionne comme un clavier.</p>
+        </div>
+        <div><x-input-label for="product_id" value="Produit" /><select id="product_id" name="product_id" class="mt-1 block w-full rounded-md border-gray-300" required>@foreach ($products as $product)<option value="{{ $product->id }}" data-barcodes="{{ $product->barcodes->pluck('barcode')->implode('|') }}">{{ $product->name }} ({{ $product->sku }})</option>@endforeach</select></div>
         <div class="grid gap-5 sm:grid-cols-2"><div><x-input-label for="ordered_quantity" value="Quantité commandée" /><x-text-input id="ordered_quantity" name="ordered_quantity" type="number" min="1" class="mt-1 block w-full" required /></div><div><x-input-label for="unit_cost_xof" value="Coût unitaire (FCFA)" /><x-text-input id="unit_cost_xof" name="unit_cost_xof" type="number" min="0" class="mt-1 block w-full" required /></div><div><x-input-label for="expected_at" value="Livraison prévue" /><x-text-input id="expected_at" name="expected_at" type="date" class="mt-1 block w-full" /></div></div>
         <x-text-input name="notes" class="block w-full" placeholder="Notes" /><div class="flex justify-end"><button class="rounded-md bg-green-700 px-4 py-2 text-sm font-semibold text-white">Créer la commande</button></div>
     </form></div>
+    <script>
+        (() => {
+            const scanner = document.getElementById('purchase-barcode-scanner');
+            const select = document.getElementById('product_id');
+            const message = document.getElementById('purchase-barcode-message');
+            const barcodeMap = new Map();
+
+            [...select.options].forEach((option) => {
+                option.dataset.barcodes.split('|').filter(Boolean).forEach((barcode) => barcodeMap.set(barcode.trim(), option.value));
+            });
+            scanner.addEventListener('keydown', (event) => {
+                if (event.key !== 'Enter') return;
+                event.preventDefault();
+                const productId = barcodeMap.get(scanner.value.trim());
+                if (!productId) {
+                    message.textContent = 'Code-barres introuvable dans le catalogue.';
+                    message.className = 'mt-1 text-xs text-red-700';
+                    return;
+                }
+                select.value = productId;
+                message.textContent = 'Produit sélectionné. Complétez la commande.';
+                message.className = 'mt-1 text-xs text-emerald-700';
+                scanner.value = '';
+            });
+            scanner.focus();
+        })();
+    </script>
+</x-app-layout>
 </x-app-layout>

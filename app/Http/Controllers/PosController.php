@@ -17,7 +17,7 @@ class PosController extends Controller
     {
         return view('pos.index', [
             'cashSession' => CashSession::where('user_id', $request->user()->id)->where('status', 'open')->latest()->first(),
-            'products' => Product::with('unit')->where('is_active', true)->orderBy('name')->get(),
+            'products' => Product::with(['unit', 'barcodes'])->where('is_active', true)->orderBy('name')->get(),
             'customers' => Customer::where('is_active', true)->orderBy('name')->get(),
         ]);
     }
